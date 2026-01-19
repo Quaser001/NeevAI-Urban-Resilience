@@ -1,109 +1,180 @@
-# 🌊 Neev AI – Urban Flood Intelligence System
+# 🌊 Neev AI — Urban Flood Intelligence & Decidability System
 
-**Neev AI** is an urban flood-risk decision intelligence platform designed for flood-prone Indian cities, with a pilot focus on **Guwahati, Assam**.
+Neev AI is an **urban flood-risk decision intelligence platform** designed for flood-prone Indian cities, with a pilot deployment focused on **Guwahati, Assam**.
 
-Unlike traditional flood maps that rely on static zones, Neev AI combines **terrain physics**, **multi-year climate recurrence**, **verified flood memory**, and **AI-assisted interpretation** to answer one critical question:
+Unlike traditional flood maps that mark only a few red zones, Neev AI answers a harder and more practical question:
 
-> **“Has this exact place flooded before, why did it flood, and what is likely to happen in the future?”**
+> **“Has this exact place flooded before, why did it flood, how severe was it, and what is likely to happen in the future?”**
+
+The system is built for **buyers, renters, engineers, planners, and policymakers** who need **street-level clarity**, not district-level averages.
 
 ---
 
 ## 🚨 Problem Statement
 
-Urban flooding in Indian cities is:
-- **Highly localized** (street-level, not district-level)
-- **Poorly documented** in official maps
-- **Underestimated** by buyers, renters, and even engineers
-- **Increasingly severe** due to climate change and urbanization
+Urban flooding in Indian cities suffers from four structural problems:
 
-Most existing solutions fail because they:
-- Use **static flood zones**
-- Ignore **historical news-verified flooding**
-- Provide **no explanation or context**
-- Are unusable for **non-technical users**
+1. **Extreme localization**  
+   Flooding often affects one street while the next street remains dry.
+
+2. **Loss of institutional memory**  
+   Past flood events are scattered across news articles, municipal notices, and social reports — not structured datasets.
+
+3. **Static flood maps**  
+   Existing maps show fixed zones and fail to capture recurrence, propagation, or micro-terrain effects.
+
+4. **No explainability**  
+   Most tools label an area as “safe/unsafe” without explaining *why*.
+
+As a result, people make **high-stakes real-estate and construction decisions blindly**.
 
 ---
 
-## 💡 Neev AI – Core Idea
+## 💡 Neev AI — Core Idea
 
 Neev AI treats flooding as a **decidable phenomenon**, not a binary label.
 
-Every location is evaluated using:
-- **Physical terrain constraints**
-- **Multi-year rainfall stress**
-- **Historical flood memory**
-- **Proximity-based impact propagation**
-- **Human-readable AI explanations**
+Each location is evaluated using:
+- Physical terrain constraints
+- Multi-year rainfall recurrence
+- Verified historical flood memory
+- Distance-based impact propagation
+- AI-generated human-readable explanations
 
-This enables risk assessment **even if the exact coordinate was never officially mapped**.
+This allows risk assessment **even if the exact coordinate was never officially mapped as flooded**.
 
 ---
 
-## 👥 Target Users
+## 👥 Who Is This For?
 
-### 🏠 Buyers / Renters
-- “Did this exact street flood in the past?”
-- “Will my parking or ground floor be affected?”
-- “Is this risk occasional or chronic?”
+### 🏠 Buyers & Renters
+- “Did this exact street flood in 2022?”
+- “What kind of damage usually happens here?”
+- “Will parking or ground floors be affected?”
 
-### 👷 Engineers / Builders
+### 👷 Engineers & Builders
 - “Is this site a drainage bowl?”
-- “Should basements be avoided here?”
+- “Should basements be avoided?”
 - “What mitigation strategies are required?”
 
 ---
 
 ## 🧠 System Architecture (Agentic Design)
 
-Neev AI is built as a **multi-agent decision system**.
+Neev AI is implemented as a **multi-agent decision system** where each agent has a clearly defined epistemic role.
 
-### **Agent A – Physics (Deterministic)**
-- Uses satellite-derived DEM (Digital Elevation Model)
-- Identifies low-lying terrain and drainage constraints
-- No AI hallucination — hard numbers only
+---
 
-### **Agent B – Climate Recurrence (Deterministic)**
-- Scans **2020–2024 monsoon data**
-- Counts extreme rainfall events (>50mm/day)
-- Captures recurrence, not single-year anomalies
+### **Agent A — Physics (Deterministic)**  
+**What it does**
+- Queries satellite-derived Digital Elevation Models (DEM)
+- Detects low-lying terrain and drainage constraints
 
-### **Agent B2 – Flood Memory (Knowledge-Grounded)**
-- Structured database built from:
+**Why deterministic**
+- Elevation must be factual
+- No AI hallucination allowed
+
+---
+
+### **Agent B — Climate Recurrence (Deterministic)**  
+**What it does**
+- Scans **2020–2024 monsoon seasons**
+- Counts extreme rainfall days (>50mm/day)
+- Captures recurrence, not one-off events
+
+**Why multi-year**
+- Prevents “last year was a fluke” errors
+
+---
+
+### **Agent B2 — Flood Memory (Knowledge-Grounded)**  
+**What it does**
+- Maintains a structured **Flood Memory Database**
+- Built from:
   - News reports
   - Municipal disclosures
-  - Resident-reported flooding
-- Stores:
-  - Affected ward
-  - Flood years
-  - Severity
-  - Impact radius
-- Enables statements like:
-  > **“This exact street flooded in 2022.”**
+  - Resident-reported events
 
-### **Agent C – AI Consultant (Gemini)**
-- Does **not** compute scores
-- Converts structured risk signals into:
+**Stored attributes**
+- Ward
+- Affected radius (flood spreads, not points)
+- Flood years
+- Impact descriptions
+- Severity score
+
+**Enables statements like**
+> **“This exact street flooded in 2022.”**
+
+---
+
+### **Agent C — AI Consultant (Gemini)**  
+**What it does**
+- Does *not* compute risk scores
+- Converts structured signals into:
   - Damage narratives
-  - Resident impact explanations
+  - Resident experience explanations
   - 2035 climate outlook
-- Fully grounded on Agent A/B/B2 outputs
+
+**Key constraint**
+- AI reasoning is **grounded only on Agent A/B/B2 outputs**
 
 ---
 
 ## 🗺️ Mapping & Visualization
 
-Neev AI provides **multi-layer GIS intelligence**:
+Neev AI provides **multi-layer GIS intelligence**, not a single map.
 
-- **Street Map** – locality & navigation context  
-- **Satellite Map** – built-up area & drainage patterns  
-- **Elevation (Topo) Map** – terrain & slope awareness  
-- **Flood Memory Overlays** – historical impact zones  
+### Available Layers
+- 🛣️ Street Map (navigation & locality context)
+- 🛰️ Satellite Imagery (built-up area & drainage clues)
+- ⛰️ Elevation / Topographic Map (slope & basin awareness)
+- 🌊 Flood Memory Zones (historical impact areas)
 
-Flood areas are intentionally modeled as **zones**, not points, because real flooding spreads beyond exact coordinates.
+Flood areas are intentionally modeled as **zones**, because real flooding spreads to surrounding streets.
 
 ---
 
 ## 📊 Flood Risk Scoring (Explainable)
 
-Flood Risk Score (0–100) is computed using:
+The Flood Risk Score (0–100) is computed using:
+-Risk Score =
+T-errain Deficit (Elevation)
+-Climate Stress (Extreme Rainfall)
 
+Flood Memory Severity
+
+There is **no black-box ML** in scoring.  
+Every component is visible and explainable in the UI.
+
+---
+
+## 🔍 Key Features
+
+- 📍 Address search with auto-centering
+- 🖱️ Click-anywhere point analysis
+- 🧠 “Flood Memory” with year-specific events
+- 🧭 Buyer vs Engineer mode separation
+- 🧱 Blueprint upload (Engineer mode only)
+- 🧾 AI-generated impact narratives
+- 🗺️ Multiple map layers (Street / Satellite / Elevation)
+- 📘 In-app step-by-step user guidance
+- 🧠 Transparent agent architecture explanation
+
+---
+
+## 🧪 Tech Stack
+
+- **App Framework**: Streamlit  
+- **Maps & GIS**: Folium, OpenStreetMap, Esri World Imagery, OpenTopoMap  
+- **Geocoding**: Nominatim (OpenStreetMap)  
+- **Climate & Elevation Data**: Open-Meteo, NASA SRTM  
+- **AI Reasoning**: Google Gemini (text-only, grounded)  
+- **Hosting**: Streamlit Community Cloud  
+
+---
+
+## 🚀 Running the App Locally
+
+```bash
+pip install streamlit streamlit-folium folium geopy requests google-generativeai
+streamlit run app.py
