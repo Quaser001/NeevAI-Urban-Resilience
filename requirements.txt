@@ -1,0 +1,6 @@
+streamlit>=1.31
+streamlit-folium>=0.18
+folium>=0.15
+requests>=2.31
+geopy>=2.4
+google-generativeai>=0.3.2
