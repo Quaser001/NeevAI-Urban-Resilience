@@ -8,18 +8,18 @@ import google.generativeai as genai
 import json
 
 # =========================================================
-# 1. APP CONFIG
+# APP CONFIG
 # =========================================================
 
 st.set_page_config(
     page_title="Neev AI | Urban Flood Intelligence",
     page_icon="🌊",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # =========================================================
-# 2. MODERN UI STYLING
+# MODERN UI STYLING
 # =========================================================
 
 st.markdown("""
@@ -37,6 +37,14 @@ html, body, [class*="css"] {
     background: #ffffff;
 }
 
+.section-card {
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    margin-bottom: 16px;
+}
+
 .verdict {
     padding: 18px;
     border-radius: 14px;
@@ -47,13 +55,6 @@ html, body, [class*="css"] {
 .high { background: #fee2e2; color: #7f1d1d; }
 .mid  { background: #fff7ed; color: #9a3412; }
 .low  { background: #ecfeff; color: #155e75; }
-
-.metric {
-    padding: 12px;
-    border-radius: 10px;
-    background: #f8fafc;
-    text-align: center;
-}
 
 .caption {
     font-size: 0.85rem;
@@ -68,7 +69,7 @@ button {
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 3. GEMINI CONFIG (SAFE MODEL)
+# GEMINI CONFIG
 # =========================================================
 
 try:
@@ -78,8 +79,9 @@ except:
     GEMINI_ENABLED = False
 
 # =========================================================
-# 4. FLOOD MEMORY DATABASE (AGENT B2)
+# FLOOD MEMORY DATABASE (AGENT B2)
 # =========================================================
+
 
 FLOOD_MEMORY = {
     "Anil Nagar": {
@@ -135,7 +137,7 @@ FLOOD_MEMORY = {
 }
 
 # =========================================================
-# 5. AGENT A – PHYSICS (ELEVATION)
+# AGENTS
 # =========================================================
 
 def get_elevation(lat, lon):
@@ -144,10 +146,6 @@ def get_elevation(lat, lon):
         return requests.get(url, timeout=3).json()["elevation"][0]
     except:
         return 50.0
-
-# =========================================================
-# 6. AGENT B – CLIMATE RECURRENCE
-# =========================================================
 
 def rainfall_events(lat, lon):
     try:
@@ -164,10 +162,6 @@ def rainfall_events(lat, lon):
     except:
         return 0
 
-# =========================================================
-# 7. AGENT B2 – FLOOD MEMORY MATCHING
-# =========================================================
-
 def match_flood_memory(lat, lon):
     hits = []
     for area, info in FLOOD_MEMORY.items():
@@ -176,46 +170,25 @@ def match_flood_memory(lat, lon):
             hits.append((area, info, int(d)))
     return hits
 
-# =========================================================
-# 8. AGENT C – GEMINI NARRATIVE (OPTIONAL)
-# =========================================================
-
 def generate_narrative(score, memory_hits):
     if not GEMINI_ENABLED:
-        return "AI narrative unavailable (API not configured)."
+        return "AI narrative unavailable."
 
     model = genai.GenerativeModel("gemini-1.0-pro")
-
-    context = ", ".join([f"{a} (flooded in {list(i['events'].keys())})" for a,i,_ in memory_hits])
+    context = ", ".join([f"{a} flooded in {list(i['events'].keys())}" for a,i,_ in memory_hits])
 
     prompt = f"""
 You are an urban flood risk analyst in Guwahati.
 
 Risk Score: {score}/100
-Historical flood context: {context}
+Historical context: {context}
 
-Explain:
-1. What kind of damage typically occurs here
-2. What residents experience during monsoon
-3. How risk may worsen by 2035
-
-Keep it factual and concise.
+Explain likely damage, resident impact, and 2035 outlook.
 """
     return model.generate_content(prompt).text
 
 # =========================================================
-# 9. GEOCODING (ADDRESS → MAP)
-# =========================================================
-
-def resolve_address(query):
-    geolocator = Nominatim(user_agent="neev_ai")
-    loc = geolocator.geocode(query)
-    if loc:
-        return loc.latitude, loc.longitude
-    return None
-
-# =========================================================
-# 10. MAP RENDERING
+# MAP
 # =========================================================
 
 def render_map(lat, lon):
@@ -224,16 +197,13 @@ def render_map(lat, lon):
     folium.TileLayer("OpenStreetMap", name="Street").add_to(m)
     folium.TileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        attr="Esri",
-        name="Satellite"
+        attr="Esri", name="Satellite"
     ).add_to(m)
     folium.TileLayer(
         "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-        attr="Topo",
-        name="Elevation"
+        attr="Topo", name="Elevation"
     ).add_to(m)
 
-    # Flood memory zones
     for area, info in FLOOD_MEMORY.items():
         folium.Circle(
             [info["lat"], info["lon"]],
@@ -241,7 +211,7 @@ def render_map(lat, lon):
             color="#dc2626",
             fill=True,
             fill_opacity=0.12,
-            tooltip=f"{area} – flooded in {', '.join(map(str, info['events'].keys()))}"
+            tooltip=f"{area} flooded in {', '.join(map(str, info['events'].keys()))}"
         ).add_to(m)
 
     folium.Marker([lat, lon], icon=folium.Icon(icon="info-sign")).add_to(m)
@@ -250,23 +220,36 @@ def render_map(lat, lon):
     return st_folium(m, height=520, width="100%", returned_objects=["last_clicked"])
 
 # =========================================================
-# 11. MAIN APP
+# PAGES
 # =========================================================
 
-def main():
+def page_home():
+    st.title("🌊 Neev AI")
+    st.subheader("Urban Flood Intelligence for Safer Decisions")
+
+    st.markdown("""
+    **Neev AI** helps residents, buyers, and engineers understand **real flood risk**  
+    — not just elevation, but **what actually flooded, where, and why**.
+
+    Built specifically for **Guwahati**, using:
+    - Historical flood memory
+    - Terrain physics
+    - Climate recurrence
+    - AI-assisted interpretation
+    """)
+
+def page_intelligence():
     if "lat" not in st.session_state:
         st.session_state.lat = 26.1685
         st.session_state.lon = 91.7760
 
-    st.title("🌊 Neev AI – Urban Flood Intelligence")
-
     mode = st.radio("User Mode", ["Buyer / Renter", "Engineer"], horizontal=True)
 
-    search = st.text_input("Search address (auto-centers map)", placeholder="Type locality / street / landmark")
+    search = st.text_input("Search address (auto-centers map)")
     if search:
-        coords = resolve_address(search)
-        if coords:
-            st.session_state.lat, st.session_state.lon = coords
+        loc = Nominatim(user_agent="neev_ai").geocode(search)
+        if loc:
+            st.session_state.lat, st.session_state.lon = loc.latitude, loc.longitude
 
     col1, col2 = st.columns([1.6, 1])
 
@@ -287,23 +270,59 @@ def main():
         cls = "high" if score > 60 else "mid" if score > 30 else "low"
         st.markdown(f"<div class='verdict {cls}'>Flood Risk Score: {score}/100</div>", unsafe_allow_html=True)
 
-        st.markdown("### 📍 Place Intelligence")
-        st.markdown(f"**Elevation:** {elev:.1f} m")
-        st.markdown(f"**Extreme rainfall days (5yr):** {rain}")
-
-        if memory_hits:
-            st.markdown("### 🧠 Flood Memory")
-            for area, info, dist in memory_hits:
-                years = ", ".join(map(str, info["events"].keys()))
-                st.markdown(f"• **{area}** ({dist} m away) — flooded in {years}")
-        else:
-            st.markdown("No major flood memory recorded nearby.")
+        st.markdown("### 🧠 Flood Memory")
+        for area, info, dist in memory_hits:
+            st.markdown(f"- **{area}** ({dist} m): flooded in {', '.join(map(str, info['events'].keys()))}")
 
         if mode == "Engineer":
-            st.file_uploader("Upload design drawings (Engineer mode only)")
+            st.file_uploader("Upload design drawings")
 
         if st.button("Generate Impact Narrative"):
             st.write(generate_narrative(score, memory_hits))
 
+def page_agents():
+    st.title("🧠 Agentic System")
+
+    st.markdown("""
+    **Agent A – Physics**
+    - Satellite elevation (DEM)
+    
+    **Agent B – Climate**
+    - 5-year extreme rainfall recurrence
+    
+    **Agent B2 – Flood Memory**
+    - Verified historical flood events by ward
+    
+    **Agent C – AI Consultant**
+    - Interprets risk & explains human impact
+    """)
+
+def page_guide():
+    st.title("📘 How to Use Neev AI")
+
+    st.markdown("""
+    **Step 1:** Search your address or click on the map  
+    **Step 2:** View flood memory & risk score  
+    **Step 3:** Switch modes (Buyer / Engineer)  
+    **Step 4:** Generate impact narrative  
+
+    *No blueprints required for buyers.*
+    """)
+
+# =========================================================
+# MAIN
+# =========================================================
+
+def main():
+    with st.sidebar:
+        st.markdown("## Neev AI")
+        page = st.radio("Navigation", ["🏠 Home", "🗺️ Flood Intelligence", "🧠 Agentic System", "📘 How to Use"])
+
+    if page == "🏠 Home": page_home()
+    if page == "🗺️ Flood Intelligence": page_intelligence()
+    if page == "🧠 Agentic System": page_agents()
+    if page == "📘 How to Use": page_guide()
+
 if __name__ == "__main__":
     main()
+
